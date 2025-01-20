@@ -1,7 +1,7 @@
 {
   "name": "admin-dashboard",
   "version": "0.1.0",
-  "homepage": "https://biblioteket.globalgathering.no/gamingrom-admin/",
+  "homepage": "https://yourwebsite.com/gamingroom-admin-eller-noe-lignende/",
   "private": true,
   "proxy": "http://localhost:3002",
   "dependencies": {
