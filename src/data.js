@@ -1,7 +1,7 @@
 
 import { getToday, generateTimeSlots } from './functions';
 
-// Sample/mock data:
+// Data:
 let settings = {
     "timeSlotSize": 15, // In minutes
     "today": getToday(),
@@ -40,18 +40,6 @@ let settings = {
             "title": "XBOX 2"
         },
     },
-    "passwords": [
-        'bil', 'tre', 'katt', 'hund', 'ball', 'bok', 'hus', 'mat', 'fugl', 'hest',
-        'elv', 'bro', 'tak', 'kopp', 'bord', 'stol', 'tann', 'fisk',
-        'øre', 'hode', 'brus', 'is', 'måne', 'sol', 'regn', 'snø', 'kake', 'te',
-        'klokke', 'lampe', 'sekk', 'blyant', 'telt', 'rosa', 'blå', 'grønn',
-        'gul', 'sko', 'genser', 'hatt', 'ring', 'stjerne', 'natt', 'dag', 'uke',
-        'år', 'hjul', 'billett', 'hopp', 'stige', 'stein', 'flue',
-        'nål', 'snor', 'sokk', 'grå', 'rød', 'tau', 'flaske',
-        'boks', 'lås', 'kran', 'kasse', 'tavle', 'flagg', 'dukke', 'fyr', 'drue',
-        'brød', 'ost', 'egg', 'salt', 'vin', 'melk', 'teppe', 'pute',
-        'tromme', 'fiolin', 'gitar', 'trompet', 'perle', 'mynt', 'kort', 'hjerte'
-    ],
     "statuses": {
         "scheduled": {
             "title": "Planlagt",
