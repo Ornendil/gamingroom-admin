@@ -1,0 +1,59 @@
+#loginForm{
+    display: flex;
+    border: 1px solid red;
+    /* height: 100vh; */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+    max-width: 400px;  /* Limit the form width for better visual balance */
+    margin: 20vh auto;    /* Center the form horizontally */
+    padding: 2rem;     /* Add some space inside the form */
+    border: 1px solid #ddd;  /* Light border to distinguish the form area */
+    border-radius: 8px;  /* Rounded corners for a softer look */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    font-family: Arial, sans-serif;  /* Clean, modern font */
+}
+
+.loginLogo{
+    width: 20rem;
+    max-width: 80%;
+}
+
+#loginForm h1 {
+    text-align: center;  /* Center the header text */
+    font-size: 1.8rem;  /* Adjust the size for readability */
+}
+
+#loginForm input[type="text"],
+#loginForm input[type="password"] {
+    width: 100%;  /* Full width of form */
+    padding: 0.75rem;  /* Comfortable input padding */
+    border: 1px solid #ccc;  /* Light gray border */
+    border-radius: 4px;  /* Small rounding for consistency */
+    font-size: 1rem;  /* Comfortable text size */
+    box-sizing: border-box;  /* Include padding/border in the element's total width */
+}
+
+#loginForm input[type="text"]:focus,
+#loginForm input[type="password"]:focus {
+    outline: none;  /* Remove default outline */
+    border-color: #007BFF;  /* Highlight with a blue border on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);  /* Subtle glow for focus */
+}
+
+#loginForm button[type="submit"] {
+    width: 100%;  /* Full width of the button */
+    padding: 0.75rem;  /* Comfortable button padding */
+    background-color: #007BFF;  /* Blue background color */
+    color: #fff;  /* White text */
+    border: none;  /* No border */
+    border-radius: 4px;  /* Matching rounded corners */
+    font-size: 1rem;  /* Comfortable font size */
+    cursor: pointer;  /* Hand cursor on hover */
+    transition: background-color 0.3s ease;  /* Smooth color change on hover */
+}
+
+#loginForm button[type="submit"]:hover {
+    background-color: #0056b3;  /* Darker blue for hover state */
+}

@@ -1,0 +1,73 @@
+.Overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Modal {
+    background-color: white;
+    padding: 1em;
+    max-width: 100%;
+    width: 30em;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--mid);
+    box-shadow: .5em .5em 2em rgba(0, 0, 0, 0.1);
+}
+
+.Modal h2{
+    margin: 0;
+    text-align: center;
+}
+
+.Modal form {
+    display: flex;
+    flex-direction: column;
+    gap: .5em;
+}
+.Modal .formSection{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: .5em;
+}
+
+.Modal label{
+    flex: 1 1 5em;
+    font-weight: bold;
+}
+.Modal input[type="text"]{
+    padding: 1em;
+    border-radius: .5em;
+    border: 1px solid var(--mid);
+    flex: 1 1 100%;
+}
+
+.Modal .formSection span{
+    flex: 1 1 100%;
+}
+
+.Modal button{
+    flex: 1 1 50%;
+    padding: 1em;
+    border-radius: .5em;
+    border: 0px solid var(--mid);
+    cursor: pointer;
+}
+.Modal button:hover{
+    opacity: .8;
+}
+.Modal button[type="submit"]{
+    background-color: #19975D;
+    color: white;
+    font-weight: bold;
+}
+.Modal button[type="button"]{
+    background-color: #EEE;
+    color: #999;
+}

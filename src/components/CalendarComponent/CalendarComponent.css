@@ -1,0 +1,108 @@
+/* CalendarComponent.css */
+
+.calendar-wrapper{
+    display: grid;
+    grid-template-columns: 8em auto;
+    grid-template-rows: 3em auto;
+    margin: 1em;
+    background-color: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background-color: var(--bg);
+    flex: 1 1 auto;
+}
+
+.dummyDiv{
+    grid-column: 1;
+    grid-row: 1;
+    background-color: #19975d;
+}
+
+.computers-header{
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: repeat(var(--number-of-computers), 1fr);
+    background-color: #19975d;
+    color: white;
+}
+.computer-header{
+    /* flex: 0 0 6em; */
+}
+.computer-header h2{
+    font-size: 1em;
+}
+
+.time-slot-header{
+    display: flex;
+    flex-direction: column;
+    text-wrap: nowrap;
+    grid-row: 2;
+    height: 100%;
+    display: grid;
+}
+.time-slot-header .time-slot{
+    border-left: 0px solid #eee;
+    padding: 0 .5em;
+}
+
+.calendar-grid {
+    grid-column: 2;
+    grid-row: 2;
+    display: grid;
+    grid-template-rows: repeat(var(--number-of-computers), minmax(450px, auto));
+    overflow-x: auto;
+    width: 100%;
+    min-width: max-content;
+    padding: 0;
+    margin: 0;
+}
+
+.time-slots,
+.sessions{
+    display: grid;
+    grid-template-columns: repeat(var(--number-of-computers), 1fr);
+    grid-template-rows: repeat(var(--number-of-time-slots), 1fr);
+    grid-area: 1 / 1 / -1 / -1; /* This places both elements in the same grid cell, overlapping them */
+    overflow: hidden;
+}
+
+.time-slot {
+    border: 1px solid #fff;
+    border-bottom: 1px solid transparent;
+    border-left: 1px solid transparent;
+    border-top: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 1.8em;
+    /* max-height: 4em; */
+}
+  
+.time-slot[data-time$="00"]{
+    /* border-top: 1px solid var(--dark); */
+}
+.time-slot[data-slot="1"]{
+    border-top: 1px solid white;
+}
+.time-slot[data-time$="00"]{
+    background-color: rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+}
+.time-slot[data-time$="15"]{
+    background-color: rgba(0, 0, 0, 0.025);
+}
+.time-slot[data-time$="30"]{
+    background-color: rgba(0, 0, 0, 0.05);
+}
+.time-slot[data-time$="45"]{
+    background-color: rgba(0, 0, 0, 0.025);
+}
+
+
+.sessions{
+    pointer-events: none;
+}
+
+.Modal{
+    background-color: red;
+}

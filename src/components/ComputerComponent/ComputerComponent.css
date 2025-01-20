@@ -1,0 +1,35 @@
+.computer-column {
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-rows: repeat(auto-fit, minmax(20px, auto)); /* Adjust based on your time slot size */
+}
+
+.time-slots,
+.sessions{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(var(--number-of-time-slots), 1fr);
+    /* gap: 1px; */
+    grid-area: 1 / 1 / -1 / -1; /* This places both elements in the same grid cell, overlapping them */
+}
+
+.time-slots{
+
+}
+
+.sessions{
+
+}
+
+.time-slot {
+    border: 1px solid #eee;
+    border-top: 0;
+    border-left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.time-slot:nth-of-type(1){
+    border-top: 1px solid #eee;
+}
