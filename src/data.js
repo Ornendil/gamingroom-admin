@@ -31,13 +31,21 @@ let settings = {
             "index": 4,
             "title": "PC 4"
         },
-        "XBOX1": {
+        "PSV1": {
             "index": 5,
-            "title": "XBOX 1"
+            "title": "PlayStation Venstre 1"
         },
-        "XBOX2": {
+        "PSV2": {
             "index": 6,
-            "title": "XBOX 2"
+            "title": "PlayStation Venstre 2"
+        },
+        "PSH1": {
+            "index": 7,
+            "title": "PlayStation Høyre 1"
+        },
+        "PSH2": {
+            "index": 8,
+            "title": "PlayStation Høyre 2"
         },
     },
     "statuses": {
