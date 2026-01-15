@@ -1,6 +1,6 @@
 // CalendarComponent.jsx
 import React from 'react';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import './CalendarComponent.css';
 import SessionComponent from '../SessionComponent/SessionComponent'; // Import the SessionComponent
 import {
@@ -9,6 +9,29 @@ import {
 } from '../../functions';
 import useCurrentTimePercentage from '../../functionCurrentTimePercent';
 import ModalComponent from '../ModalComponent/ModalComponent';
+import { icons } from "../../assets/icons";
+import { getTimeSlotsToday } from '../../timeSlotsToday';
+
+function getDeviceList(settings) {
+    // Preferred: API-shaped devices (future)
+    if (settings?.tenant?.devices?.length) {
+        return settings.tenant.devices.map((d, index) => ({
+            id: d.id,
+            label: d.label,
+            type: d.type,
+            col: index + 1,
+        }));
+    }
+
+    // Legacy fallback: settings.computers
+    return Object.entries(settings.computers).map(([key, c]) => ({
+        id: key,
+        label: c.title,
+        type: c.type,
+        col: c.index,
+    }));
+}
+
 
 function CalendarComponent({ sessions, settings, onLogout }) {
     const [data, setData] = useState(sessions); // This will store your fetched data
@@ -104,21 +127,30 @@ function CalendarComponent({ sessions, settings, onLogout }) {
         setIsModalOpen(true);
     };
 
+    const timeSlotsToday = useMemo(() => getTimeSlotsToday(settings), [settings]);
+
+    const isClosedToday =
+        settings?.tenant?.today?.isClosedToday ||
+        !timeSlotsToday ||
+        timeSlotsToday.length < 2;
+
+
     // The thing that shows how far the day has progressed
-    const currentTimeAsPercentOfDay = useCurrentTimePercentage(settings);
+    const currentTimeAsPercentOfDay = useCurrentTimePercentage(timeSlotsToday);
     const calendarStyle = {
         background: `linear-gradient(180deg, rgba(25, 151, 93, .25) ${currentTimeAsPercentOfDay - 0.5}%, rgba(25, 151, 93, .5) ${currentTimeAsPercentOfDay}%, rgba(0,0,0,0) ${currentTimeAsPercentOfDay + 0.25}%)`
     };
 
-    const timeSlotsToday = settings.aapningstider[settings.today].timeSlots;
+    const devices = getDeviceList(settings);
 
     return (
         <div className='calendar-wrapper'>
             <div className='dummyDiv'></div>
-            <div className='computers-header' style={{ '--number-of-computers': Object.keys(settings.computers).length }}>
-                {Object.keys(settings.computers).map((computer, index) => (
-                    <div key={computer} className='computer-header'>
-                        <h2>{settings.computers[computer].title}</h2>
+            <div className='computers-header' style={{ '--number-of-computers': devices.length }}>
+                {devices.map((device, index) => (
+                    <div key={device.id} className={`computer-header header-${device.type}`}>
+                        <img src={icons[device.type]} alt=''/>
+                        <h2>{device.label}</h2>
                     </div>
                 ))}
             </div>
@@ -136,18 +168,31 @@ function CalendarComponent({ sessions, settings, onLogout }) {
                     </div>
                 ))}
             </div>
+
+            {isClosedToday ? (
+                <div className="closed-banner">
+                    <strong>Stengt i dag</strong>
+                    {settings?.tenant?.today?.dayKey && (
+                        <span style={{ marginLeft: 8, opacity: 0.8 }}>
+                            ({settings.tenant.today.dayKey})
+                        </span>
+                    )}
+                </div>
+            ) : (
+                <>
+
             <div className="calendar-grid" style={calendarStyle}>
-                <div className='time-slots' style={{ '--number-of-time-slots': timeSlotsToday.length, '--number-of-computers': Object.keys(settings.computers).length }}>
-                    {Object.entries(settings.computers).map(([computerKey, computer], i) => (
+                <div className='time-slots' style={{ '--number-of-time-slots': timeSlotsToday.length, '--number-of-computers': devices.length }}>
+                    {devices.map((device) => (
                         timeSlotsToday.map((slot, y) => (
                             <div
-                                key={`computer-${computerKey}-slot-${y}`}
+                                key={`device-${device.id}-slot-${y}`}
                                 className="time-slot"
                                 onDoubleClick={openSaveModal}
-                                style={{ gridRowStart: slot.i, gridColumnStart: computer.index }}
+                                style={{ gridRowStart: slot.i, gridColumnStart: device.col }}
                                 data-slot={y + 1}
                                 data-time={slot.fra}
-                                data-computer={computerKey}
+                                data-computer={device.id}
                                 {...(parseInt(slot.i) === timeSlotsToday.length && { 'data-last': true })}
                             >
                                 {/* {computer.title}: {slot.fra} - {slot.til} */}
@@ -156,7 +201,7 @@ function CalendarComponent({ sessions, settings, onLogout }) {
                     ))}
                 </div>
 
-                <div className='sessions' style={{ '--number-of-time-slots': timeSlotsToday.length, '--number-of-computers': Object.keys(settings.computers).length }}>
+                <div className='sessions' style={{ '--number-of-time-slots': timeSlotsToday.length, '--number-of-computers': devices.length }}>
                     {data.map((session, index) => (
                         <SessionComponent
                             key={session.id}
@@ -168,13 +213,22 @@ function CalendarComponent({ sessions, settings, onLogout }) {
                             setIsEditing={setIsEditing}
                             // onClick={onSessionClick}
                             settings={settings}
+                            devices={devices}
+                            timeSlotsToday={timeSlotsToday}
                         />
                     ))}
                 </div>
             </div>
+
+
+                </>
+            )}
+
+
             <ModalComponent
                 isOpen={isModalOpen}
                 settings={settings}
+                timeSlotsToday={timeSlotsToday}
                 sessionDetails={newSessionDetails}
                 onRequestClose={() => setIsModalOpen(false)}
                 onSave={(sessionData) => save(sessionData, addDataEntry)}

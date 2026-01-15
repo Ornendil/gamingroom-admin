@@ -3,24 +3,43 @@ import { useState, useEffect } from 'react';
 import { parseTime } from './functions';
 
 
-const useCurrentTimePercentage = (settings) => {
+const useCurrentTimePercentage = (timeSlotsToday) => {
     const [currentTimeAsPercentOfDay, setCurrentTimeAsPercentOfDay] = useState(0);
 
-    useEffect(() => {
-        const updateCurrentTimePercentage = () => {
-            const now = new Date();
-            const startOfDay = parseTime(settings.aapningstider[settings.today].fra);
-            const endOfDay = parseTime(settings.aapningstider[settings.today].til);
-            const percentOfDay = ((now - startOfDay) / (endOfDay - startOfDay)) * 100;
+useEffect(() => {
+    if (!timeSlotsToday || timeSlotsToday.length < 2) {
+        setCurrentTimeAsPercentOfDay(0);
+        return;
+    }
 
-            setCurrentTimeAsPercentOfDay(percentOfDay);
-        };
+    const updateCurrentTimePercentage = () => {
+        const now = new Date();
 
-        updateCurrentTimePercentage(); // Run initially
-        const intervalId = setInterval(updateCurrentTimePercentage, 60000);
+        // First real slot start
+        const startOfDay = parseTime(timeSlotsToday[0].fra);
 
-        return () => clearInterval(intervalId);
-    }, [settings]);
+        // Last boundary row = closing time
+        const endOfDay = parseTime(
+            timeSlotsToday[timeSlotsToday.length - 1].fra
+        );
+
+        if (!(startOfDay < endOfDay)) {
+            setCurrentTimeAsPercentOfDay(0);
+            return;
+        }
+
+        const percentOfDay =
+            ((now - startOfDay) / (endOfDay - startOfDay)) * 100;
+
+        setCurrentTimeAsPercentOfDay(percentOfDay);
+    };
+
+    updateCurrentTimePercentage();
+    const intervalId = setInterval(updateCurrentTimePercentage, 60000);
+
+    return () => clearInterval(intervalId);
+}, [timeSlotsToday]);
+
 
     return currentTimeAsPercentOfDay;
 };

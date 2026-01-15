@@ -25,6 +25,8 @@ function SessionComponent({
     session,
     onClick,
     settings,
+    devices = [],
+    timeSlotsToday,
     updateDataEntry,
     removeDataEntry,
     setIsEditing,
@@ -34,11 +36,20 @@ function SessionComponent({
     onChangeName
 }) {
 
-    const computerSettings = settings.computers[session.computer];
-    const timeSlotsToday = settings.aapningstider[settings.today].timeSlots;
+    const sessionComputer = session.computer ?? "";
+    const normalized = String(sessionComputer).toLowerCase();
+
+    const deviceIndex = (devices || []).findIndex(d => {
+        if (!d?.id) return false;
+        const did = String(d.id);
+        return did === sessionComputer || did.toLowerCase() === normalized;
+    });
+
     const timeSlotIndex = session.time_slot - 1;
+
     const row = session.time_slot;
-    const col = computerSettings ? computerSettings.index : 1;
+    const col = deviceIndex >= 0 ? (deviceIndex + 1) : 1;
+
     session.fra = timeSlotsToday[timeSlotIndex].fra;
     session.til = timeSlotsToday[timeSlotIndex].til;
 

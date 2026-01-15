@@ -4,9 +4,10 @@ import styles from './ModalComponent.module.css';
 
 Modal.setAppElement('#root'); // Replace '#root' with your app root element ID
 
-function NewSessionModal({ isOpen, settings, sessionDetails, onRequestClose, onSave }) {
+function NewSessionModal({ isOpen, settings, timeSlotsToday, sessionDetails, onRequestClose, onSave }) {
     const [lnr, setLnr] = useState('');
     const [name, setName] = useState('');
+    const nameInputRef = useRef(null);
     const cardInputRef = useRef(null);
 
     const handleSubmit = (e) => {
@@ -20,8 +21,8 @@ function NewSessionModal({ isOpen, settings, sessionDetails, onRequestClose, onS
             setLnr('');
             setName('');
             setTimeout(() => {
-                if (cardInputRef.current) {
-                    cardInputRef.current.focus();
+                if (nameInputRef.current) {
+                    nameInputRef.current.focus();
                 }
             }, 0); // setTimeout with 0 delay
         }
@@ -56,8 +57,8 @@ function NewSessionModal({ isOpen, settings, sessionDetails, onRequestClose, onS
     let timeSlotInfo = "";
     if (sessionDetails.timeSlot !== undefined){
 
-        sessionDetails.fra = settings.aapningstider[settings.today].timeSlots[sessionDetails.timeSlot - 1].fra;
-        sessionDetails.til = settings.aapningstider[settings.today].timeSlots[sessionDetails.timeSlot].til;
+        sessionDetails.fra = timeSlotsToday[sessionDetails.timeSlot - 1].fra;
+        sessionDetails.til = timeSlotsToday[sessionDetails.timeSlot].til;
 
         timeSlotInfo = sessionDetails.fra + " - " + sessionDetails.til;
     }
@@ -81,6 +82,18 @@ function NewSessionModal({ isOpen, settings, sessionDetails, onRequestClose, onS
                     <span>{timeSlotInfo}</span>
                 </div>
                 <div className={styles.formSection}>
+                    <label htmlFor="name">Navn:</label>
+                    <input
+                        type="text"
+                        value={name}
+                        ref={nameInputRef}
+                        id='name'
+                        placeholder='Bare fornavn. Navnet synes på gamingrommet'
+                        // readOnly
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                </div>
+                <div className={styles.formSection}>
                     <label htmlFor="lnr">Lånernr:</label>
                     <input
                         type="text"
@@ -89,17 +102,6 @@ function NewSessionModal({ isOpen, settings, sessionDetails, onRequestClose, onS
                         placeholder='N00 og så videre'
                         id='lnr'
                         onChange={(e) => setLnr(e.target.value)}
-                    />
-                </div>
-                <div className={styles.formSection}>
-                    <label htmlFor="name">Navn:</label>
-                    <input
-                        type="text"
-                        value={name}
-                        id='name'
-                        placeholder='Bare fornavn. Navnet synes på gamingrommet'
-                        // readOnly
-                        onChange={(e) => setName(e.target.value)}
                     />
                 </div>
                 <div className={styles.formSection}>

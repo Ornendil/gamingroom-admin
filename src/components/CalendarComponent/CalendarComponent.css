@@ -15,18 +15,38 @@
 .dummyDiv{
     grid-column: 1;
     grid-row: 1;
-    background-color: #19975d;
+    background-color: #0078d4;
 }
 
 .computers-header{
     grid-column: 2;
     display: grid;
     grid-template-columns: repeat(var(--number-of-computers), 1fr);
-    background-color: #19975d;
+    background-color: #0078d4;
     color: white;
 }
 .computer-header{
     /* flex: 0 0 6em; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+}
+.computer-header.header-playstation{
+    background-color: #003087;
+}
+.computer-header.header-switch{
+    background-color: #e60012;
+}
+.computer-header.header-xbox{
+    background-color: #107c10;
+}
+.computer-header.header-pc{
+    background-color: #0078d4;
+}
+.computer-header img{
+    height: 1.5em;
+    /* vertical-align: middle; */
 }
 .computer-header h2{
     font-size: 1em;
@@ -105,4 +125,9 @@
 
 .Modal{
     background-color: red;
+}
+
+.closed-banner {
+  font-size: 2em;
+  padding-top: 2em;
 }

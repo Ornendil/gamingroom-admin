@@ -1,3 +1,5 @@
+import { apiUrl } from "./helpers/baseUrl";
+
 export function getToday() {// Get the current day's name
     const days = ['søndag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lørdag'];
     const today = days[new Date().getDay()];
@@ -8,29 +10,6 @@ export function parseTime(timeString) {
     const [hours, minutes] = timeString.split(':').map(Number);
     return new Date(new Date().setHours(hours, minutes, 0, 0));
 };
-
-export function generateTimeSlots(settings) {
-
-    // Get the opening and closing times for the current day
-    const { fra, til } = settings.aapningstider[settings.today];
-
-    // Convert the opening and closing times to Date objects
-    const fraDate = new Date(`1970-01-01T${fra}:00Z`);
-    const tilDate = new Date(`1970-01-01T${til}:00Z`);
-
-    // Generate the time slots
-    const timeSlots = [];
-    let i = 1;
-    while (fraDate < tilDate) {
-        const fra = fraDate.toISOString().slice(11, 16);  // Extract HH:mm
-        fraDate.setMinutes(fraDate.getMinutes() + settings.timeSlotSize);     // Increment by x minutes
-        const til = fraDate.toISOString().slice(11, 16);   // Extract HH:mm
-        timeSlots.push({ fra, til, i });
-        i++;
-    }
-
-    return timeSlots;
-}
 
 export function getTimeSlotBelow(x, y) {
     let elements = document.elementsFromPoint(x, y);
@@ -62,8 +41,8 @@ export async function apiRequest(
 
     // Determine the URL and body based on method
     const url = method === 'GET' 
-        ? `api/${endpoint}/?${new URLSearchParams(data).toString()}`
-        : `api/${endpoint}/`;
+        ? apiUrl(`/api/${endpoint}/?${new URLSearchParams(data).toString()}`)
+        : apiUrl(`/api/${endpoint}/`);
     const body = method === 'POST'
         ? new URLSearchParams(data).toString()
         : undefined;
@@ -166,9 +145,8 @@ export function save(data, addDataEntry) {
             computer: data.computer
         },
         (responseData) => {
-            if (addDataEntry && responseData.sessions) {
-                const newSession = responseData.sessions[responseData.sessions.length - 1];
-                addDataEntry(newSession);
+            if (addDataEntry && responseData.session) {
+                addDataEntry(responseData.session);
             }
         }
     );
@@ -204,17 +182,23 @@ export async function login(username, password, setIsLoggedIn) {
 
 export async function logout(setIsLoggedIn) {
     try {
+
+        const csrfToken = localStorage.getItem("csrfToken");
+
         // Call the logout endpoint to clear the refresh token server-side
-        const response = await fetch('api/logout', {
+        const response = await fetch(apiUrl('/api/logout/'), {
             method: 'POST',
             credentials: 'include', // Send cookies along with the request
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
             }
         });
 
         if (!response.ok) {
-            console.error('Failed to log out on the server');
+            const text = await response.text().catch(() => "");
+            console.error('Failed to log out on the server', response.status, text);
+            return;
         }
 
         // Clear access token from local storage
@@ -233,7 +217,7 @@ export async function logout(setIsLoggedIn) {
 
 
 export function generateLoginTokens(username, password) {
-    return fetch('api/login/', {
+    return fetch(apiUrl('/api/login/'), {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -263,7 +247,7 @@ export function generateLoginTokens(username, password) {
 // Function to refresh the Access Token using the Refresh Token
 export async function refreshAccessToken(setAccessToken, setIsLoggedIn) {
     try {
-        const response = await fetch('api/refresh/', {
+        const response = await fetch(apiUrl('/api/refresh/'), {
             method: 'POST',
             credentials: 'include',
             headers: {
