@@ -12,7 +12,19 @@ function NewSessionModal({ isOpen, settings, timeSlotsToday, sessionDetails, onR
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ ...sessionDetails, name, lnr });
+
+        if (!computed) return; // or show an error
+
+        onSave({
+            ...sessionDetails,
+            timeSlot: computed.timeSlot,
+            fra: computed.fra,
+            til: computed.til,
+            name,
+            lnr,
+        });
+
+
         onRequestClose();
     };
 
@@ -54,14 +66,35 @@ function NewSessionModal({ isOpen, settings, timeSlotsToday, sessionDetails, onR
     //     }
     // }, [lnr]);
 
+    const durationSlots = Math.max(
+        1,
+        parseInt(settings?.tenant?.defaultSessionSlots ?? 2, 10)
+    );
+    console.log('durationSlots', durationSlots);
+
+    const slotCount = Array.isArray(timeSlotsToday) ? timeSlotsToday.length : 0;
+
+    let computed = null; // { timeSlot, fra, til }
     let timeSlotInfo = "";
-    if (sessionDetails.timeSlot !== undefined){
 
-        sessionDetails.fra = timeSlotsToday[sessionDetails.timeSlot - 1].fra;
-        sessionDetails.til = timeSlotsToday[sessionDetails.timeSlot].til;
+    if (sessionDetails?.timeSlot !== undefined && slotCount > 0) {
+        const clicked = parseInt(sessionDetails.timeSlot, 10);
 
-        timeSlotInfo = sessionDetails.fra + " - " + sessionDetails.til;
+        // last valid start so that start + duration - 1 is within [1..slotCount]
+        const lastStart = Math.max(1, slotCount - durationSlots + 1);
+
+        const startSlot = Math.min(Math.max(1, clicked || 1), lastStart);
+        const endSlot = startSlot + durationSlots - 1;
+
+        const start = timeSlotsToday[startSlot - 1];
+        const end = timeSlotsToday[endSlot - 1];
+
+        if (start && end) {
+            computed = { timeSlot: startSlot, fra: start.fra, til: end.til };
+            timeSlotInfo = `${computed.fra} - ${computed.til}`;
+        }
     }
+
 
     return (
         <Modal

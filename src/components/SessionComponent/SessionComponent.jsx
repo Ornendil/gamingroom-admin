@@ -21,6 +21,39 @@ import { Menu, Item, Separator, contextMenu } from 'react-contexify';
 import 'react-contexify/dist/ReactContexify.css';
 import './ContextMenu.css';
 
+const clamp = (n, min, max) => Math.min(Math.max(n, min), max);
+
+function indexByFra(timeSlots, fra) {
+  return timeSlots.findIndex(s => s?.fra === fra); // 0-based
+}
+
+function indexByTil(timeSlots, til) {
+  return timeSlots.findIndex(s => s?.til === til); // 0-based
+}
+
+function getDurationSlots(session, timeSlots, fallback = 2) {
+  const s0 = indexByFra(timeSlots, session.fra);
+  const e0 = indexByTil(timeSlots, session.til);
+  if (s0 >= 0 && e0 >= 0 && e0 >= s0) return (e0 - s0 + 1);
+  return fallback;
+}
+
+function getFraTilFromStartSlot(startSlot1, durationSlots, timeSlots) {
+  const N = timeSlots.length;
+  const D = Math.max(1, durationSlots);
+
+  const lastStart = Math.max(1, N - D + 1);
+  const s1 = clamp(startSlot1, 1, lastStart);
+  const e1 = s1 + D - 1;
+
+  const start = timeSlots[s1 - 1];
+  const end = timeSlots[e1 - 1];
+
+  if (!start || !end) return null;
+  return { startSlot: s1, fra: start.fra, til: end.til };
+}
+
+
 function SessionComponent({
     session,
     onClick,
@@ -45,47 +78,59 @@ function SessionComponent({
         return did === sessionComputer || did.toLowerCase() === normalized;
     });
 
-    const timeSlotIndex = session.time_slot - 1;
-
-    const row = session.time_slot;
     const col = deviceIndex >= 0 ? (deviceIndex + 1) : 1;
 
-    session.fra = timeSlotsToday[timeSlotIndex].fra;
-    session.til = timeSlotsToday[timeSlotIndex].til;
+    const fallbackDuration = settings?.tenant?.defaultSessionSlots ?? 2;
 
+    const durationSlots = getDurationSlots(session, timeSlotsToday, fallbackDuration);
 
-    // Set status based on time, rather than the status from in the API (which isn't in active use anymore)
+    // derive start slot from fra if possible, else fall back to session.time_slot
+    const startIdx0 = indexByFra(timeSlotsToday, session.fra);
+    const startSlot1 = (startIdx0 >= 0) ? (startIdx0 + 1) : session.time_slot;
+
+    const computed = getFraTilFromStartSlot(startSlot1, durationSlots, timeSlotsToday);
+
+    const computedSafe = computed ?? {
+        startSlot: session.time_slot || 1,
+        fra: session.fra || "",
+        til: session.til || "",
+    };
+
+    // status based on *actual* fra/til
     const now = new Date();
-    const fra = parseTime(timeSlotsToday[timeSlotIndex].fra);
-    const til = parseTime(timeSlotsToday[timeSlotIndex + 1].til);
-    
-    if (now<fra) {
-        session.status = 'scheduled';
-    } else if (now>fra && now<til) {
-        session.status = 'ongoing';
-    } else {
-        session.status = 'finished';
-    }
+    const rowStart = computedSafe.startSlot;
+    const rowEndExclusive = rowStart + durationSlots;
 
+    const fraTime = computedSafe.fra ? parseTime(computedSafe.fra) : null;
+    const tilTime = computedSafe.til ? parseTime(computedSafe.til) : null;
 
-    let sessionClass = `${styles.session} ${styles[session.status]} session`;
+    const status =
+        !fraTime || !tilTime ? "scheduled" :
+            now < fraTime ? "scheduled" :
+            now <= tilTime ? "ongoing" :
+            "finished";
+
+    let sessionClass = `${styles.session} ${styles[status]} session`;
     let tooltip = `Bruker nummer ${session.id}`;
 
     const ref = useRef(null);
 
     const throttledOnMove = useRef(throttle((event) => {
-        // This function is where you'd handle the visual feedback of dragging
         const timeSlotData = checkForValidDrop(event, getTimeSlotBelow, getDraggableBelow);
-        if (timeSlotData) {
-            updateDataEntry({
-                id: parseInt(session.id, 10),
-                computer: timeSlotData.computer,
-                fra: timeSlotsToday[timeSlotData.slot - 1].fra,
-                til: timeSlotsToday[timeSlotData.slot].til,
-                time_slot: timeSlotData.slot,
-            });
-        }
+        if (!timeSlotData) return;
+
+        const next = getFraTilFromStartSlot(timeSlotData.slot, durationSlots, timeSlotsToday);
+        if (!next) return;
+
+        updateDataEntry({
+            id: parseInt(session.id, 10),
+            computer: timeSlotData.computer,
+            time_slot: next.startSlot,
+            fra: next.fra,
+            til: next.til,
+        });
     }, 50)).current;
+
 
     // This effect sets up the interact.js draggable functionality
     useEffect(() => {
@@ -105,16 +150,20 @@ function SessionComponent({
                 onend: (event) => {
                     const timeSlotData = checkForValidDrop(event, getTimeSlotBelow, getDraggableBelow);
                     if (timeSlotData) {
+                        const next = getFraTilFromStartSlot(timeSlotData.slot, durationSlots, timeSlotsToday);
+                        if (!next) return;
+
                         updateTime({
-                            'id': session.id,
-                            'slot': timeSlotData.slot,
-                            'fra': timeSlotsToday[timeSlotData.slot - 1].fra,
-                            'til': timeSlotsToday[timeSlotData.slot].til,
-                            'computer': timeSlotData.computer
+                            id: session.id,
+                            slot: next.startSlot,
+                            fra: next.fra,
+                            til: next.til,
+                            computer: timeSlotData.computer
                         }, updateDataEntry);
-                        setIsEditing(false);
                     }
+                    setIsEditing(false);
                 },
+
             });
         }
 
@@ -123,7 +172,7 @@ function SessionComponent({
                 interact(currentRef).unset();
             }
         };
-    }, [throttledOnMove, setIsEditing, session.id, timeSlotsToday, updateDataEntry]);
+    }, [throttledOnMove, setIsEditing, session.id, timeSlotsToday, updateDataEntry, durationSlots]);
 
 
     // Context Menu
@@ -149,7 +198,12 @@ function SessionComponent({
                 title={tooltip}
                 onContextMenu={handleContextMenu}
                 // onClick={() => onClick(session)}
-                style={{ gridRowStart: row, gridColumnStart: col }}>
+                style={{
+                    gridRowStart: rowStart,
+                    gridRowEnd: rowEndExclusive,
+                    gridColumnStart: col
+                }}
+            >
                 <div className={styles.left}>
                     <div className={styles.navnDiv}>
                         {/* <span className={styles["icon-user"]}></span> */}
@@ -164,8 +218,9 @@ function SessionComponent({
                     </div>
                 </div>
                 <div className={styles.right}>
-                    <div className={styles.fra}>{timeSlotsToday[timeSlotIndex].fra}</div>
-                    <div className={styles.til}>{timeSlotsToday[timeSlotIndex + 1].til}</div>
+                    <div className={styles.fra}>{computedSafe.fra}</div>
+                    <div className={styles.til}>{computedSafe.til}</div>
+
                 </div>
             </div>
             <Menu

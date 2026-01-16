@@ -1,47 +1,39 @@
 // useCurrentTimePercentage.js
-import { useState, useEffect } from 'react';
-import { parseTime } from './functions';
+import { useState, useEffect } from "react";
+import { parseTime } from "./functions";
 
+const useCurrentTimePercentage = (timeSlots) => {
+  const [pct, setPct] = useState(0);
 
-const useCurrentTimePercentage = (timeSlotsToday) => {
-    const [currentTimeAsPercentOfDay, setCurrentTimeAsPercentOfDay] = useState(0);
-
-useEffect(() => {
-    if (!timeSlotsToday || timeSlotsToday.length < 2) {
-        setCurrentTimeAsPercentOfDay(0);
-        return;
+  useEffect(() => {
+    if (!Array.isArray(timeSlots) || timeSlots.length === 0) {
+      setPct(0);
+      return;
     }
 
-    const updateCurrentTimePercentage = () => {
-        const now = new Date();
+    const startStr = timeSlots[0].fra;
+    const endStr = timeSlots[timeSlots.length - 1].til;
 
-        // First real slot start
-        const startOfDay = parseTime(timeSlotsToday[0].fra);
+    const update = () => {
+      const now = new Date();
+      const start = parseTime(startStr);
+      const end = parseTime(endStr);
 
-        // Last boundary row = closing time
-        const endOfDay = parseTime(
-            timeSlotsToday[timeSlotsToday.length - 1].fra
-        );
+      if (!(start instanceof Date) || !(end instanceof Date) || end <= start) {
+        setPct(0);
+        return;
+      }
 
-        if (!(startOfDay < endOfDay)) {
-            setCurrentTimeAsPercentOfDay(0);
-            return;
-        }
-
-        const percentOfDay =
-            ((now - startOfDay) / (endOfDay - startOfDay)) * 100;
-
-        setCurrentTimeAsPercentOfDay(percentOfDay);
+      const raw = ((now - start) / (end - start)) * 100;
+      setPct(Math.max(0, Math.min(100, raw)));
     };
 
-    updateCurrentTimePercentage();
-    const intervalId = setInterval(updateCurrentTimePercentage, 60000);
+    update();
+    const id = setInterval(update, 60000);
+    return () => clearInterval(id);
+  }, [timeSlots]);
 
-    return () => clearInterval(intervalId);
-}, [timeSlotsToday]);
-
-
-    return currentTimeAsPercentOfDay;
+  return pct;
 };
 
 export default useCurrentTimePercentage;

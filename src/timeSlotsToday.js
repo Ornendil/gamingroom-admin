@@ -41,13 +41,6 @@ function buildSlots(open, close, slotMinutes) {
     i++;
   }
 
-  // ✅ Add the final boundary row (closing time), so index+1 lookups work
-  slots.push({
-    i,
-    fra: formatHHMM(end),
-    til: formatHHMM(end),
-  });
-
   return slots;
 }
 
