@@ -4,7 +4,10 @@ This is the admin dashboard where your librarians will be assigning kids their g
 
 ## Dependencies
 
-This app doesn't really make sense without first installing [gamingroom-API](https://github.com/Ornendil/gamingroom-API). Afterwards, you'll probably also want to install [gamingroom-display](https://github.com/Ornendil/gamingroom-display).
+This app doesn't really make sense without first installing [gamingroom-API](https://github.com/Ornendil/gamingroom-API). The dashboard fetches tenant settings and session data from that API.
+
+Afterwards, you'll probably also want to install [gamingroom-display](https://github.com/Ornendil/gamingroom-display)
+
 
 ## Install
 
@@ -14,35 +17,47 @@ This app doesn't really make sense without first installing [gamingroom-API](htt
 
 3. Build the app. Instructions for this are below.
 
-4. Put the contents of the `build` folder in the `public` folder you created on your server when installing the [Gamingroom-API](https://github.com/Ornendil/gamingroom-API).
+4. Put the contents of the `dist` folder in the `public` folder you created on your server when installing the [Gamingroom-API](https://github.com/Ornendil/gamingroom-API).
 
-## Getting Started with Create React App
+## Configuration
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The frontend reads its API base URL from `VITE_API_BASE_URL`.
 
-### Available Scripts
+Create a local `.env.local` file when needed:
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+Optional local HTTPS for the Vite dev server can also live in `.env.local`:
+
+```dotenv
+DEV_HTTPS_KEY=./localhost+2-key.pem
+DEV_HTTPS_CERT=./localhost+2.pem
+```
+
+If those certificate paths are missing, the dev server falls back to plain HTTP automatically.
+
+## Scripts
 
 In the project directory, you can run:
 
-#### `npm start`
+### `npm run dev`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Starts the Vite dev server on port `3000`.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### `npm run build`
 
-#### `npm test`
+Builds the app into the `dist/` folder.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### `npm run preview`
 
-#### `npm run build`
+Serves the production build locally for a final check.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Deployment
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+This app is built with a Vite base path of `/admin/`.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. Run `npm run build`.
+2. Deploy the contents of `dist/` where your API serves the admin frontend from `/admin/`.
+3. Keep the static assets from `public/` alongside the built output so the manifest, icons, logos, and `robots.txt` are available.

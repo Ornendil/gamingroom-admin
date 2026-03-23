@@ -8,7 +8,7 @@ import { logout, login } from './functions';
 
 import { fetchTenant } from "./apiTenant";
 import { buildSettingsFromTenant } from "./tenantSettings";
-import { ADMIN_BASE_URL } from './helpers/baseUrl';
+import { adminUrl } from './helpers/baseUrl';
 
 
 
@@ -65,18 +65,19 @@ function App() {
 
 
     const tenantSlug = settings?.tenant?.slug;
-    const tenantLogo = tenantSlug ? `${ADMIN_BASE_URL}/tenant-logos/${tenantSlug}.svg` : null;
+    const fallbackLogo = adminUrl('/tenant-logos/logo.svg');
+    const tenantLogo = tenantSlug ? adminUrl(`/tenant-logos/${tenantSlug}.svg`) : null;
 
-    const [logoSrc, setLogoSrc] = useState(tenantLogo ?? `${ADMIN_BASE_URL}/tenant-logos/logo.svg`);
+    const [logoSrc, setLogoSrc] = useState(tenantLogo ?? fallbackLogo);
 
     useEffect(() => {
         // Try tenant logo first, fall back if missing
         if (!tenantLogo) {
-            setLogoSrc(`${ADMIN_BASE_URL}/tenant-logos/logo.svg`);
+            setLogoSrc(fallbackLogo);
             return;
         }
         setLogoSrc(tenantLogo);
-    }, [tenantLogo]);
+    }, [fallbackLogo, tenantLogo]);
 
 
 
@@ -113,7 +114,7 @@ function App() {
                             className="App-logo"
                             src={logoSrc}
                             alt=''
-                            onError={() => setLogoSrc(`${ADMIN_BASE_URL}/tenant-logos/logo.svg`)}
+                            onError={() => setLogoSrc(fallbackLogo)}
                         />
                         <div className='App-title-text'>
                             <h1>Gamingrom</h1>

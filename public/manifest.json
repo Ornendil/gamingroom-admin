@@ -5,8 +5,8 @@
   "background_color": "#fff",
   "display": "standalone",
   "orientation": "",
-  "scope": "/gamingrom-admin/",
-  "start_url": "/gamingrom-admin/",
+  "scope": "/admin/",
+  "start_url": "/admin/",
   "icons": [
     {
       "src": "images/icons/icon-72x72.png",

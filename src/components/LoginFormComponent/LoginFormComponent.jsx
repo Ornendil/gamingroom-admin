@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './LoginFormComponent.module.css';
-import { ADMIN_BASE_URL } from '../../helpers/baseUrl';
+import { adminUrl } from '../../helpers/baseUrl';
 
 function LoginFormComponent({ onLogin, tenantLogo }) {
     const [username, setUsername] = useState('');
@@ -11,9 +11,12 @@ function LoginFormComponent({ onLogin, tenantLogo }) {
         onLogin(username, password);
     };
 
-    const [logoSrc, setLogoSrc] = useState(tenantLogo ?? `${ADMIN_BASE_URL}/tenant-logos/logo.svg`);
+    const fallbackLogo = adminUrl('/tenant-logos/logo.svg');
+    const [logoSrc, setLogoSrc] = useState(tenantLogo ?? fallbackLogo);
 
-    
+    useEffect(() => {
+        setLogoSrc(tenantLogo ?? fallbackLogo);
+    }, [fallbackLogo, tenantLogo]);
 
     return (
         <form onSubmit={handleSubmit} id={styles.loginForm} className={styles.form}>
@@ -21,7 +24,7 @@ function LoginFormComponent({ onLogin, tenantLogo }) {
                 className={styles.loginLogo}
                 src={logoSrc}
                 alt=''
-                onError={() => setLogoSrc(`${ADMIN_BASE_URL}/tenant-logos/logo.svg`)}
+                onError={() => setLogoSrc(fallbackLogo)}
             />
             <h1>Gamingrom Admin</h1>
             <input
