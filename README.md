@@ -2,6 +2,8 @@
 
 This is the admin dashboard where your librarians will be assigning kids their gamingroom slots.
 
+<img width="1916" height="919" alt="gamingroom-admin" src="https://github.com/user-attachments/assets/ba2d954e-c5d8-4c79-ba17-fcee33460124" />
+
 ## Dependencies
 
 This app doesn't really make sense without first installing [gamingroom-API](https://github.com/Ornendil/gamingroom-API). The dashboard fetches tenant settings and session data from that API.
